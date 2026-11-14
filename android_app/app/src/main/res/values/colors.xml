@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Galatasaray ve Kingfool Renk Paleti -->
+    <color name="gs_kirmizi">#A6192E</color>
+    <color name="gs_kirmizi_koyu">#7A1020</color>
+    <color name="gs_sari">#FDB913</color>
+    <color name="gs_sari_acik">#FFD56B</color>
+    
+    <!-- Dark & Light Temalar -->
+    <color name="bg_dark">#121013</color>
+    <color name="card_dark">#1F1A24</color>
+    <color name="text_light">#FAF7F9</color>
+    <color name="text_muted">#A39BA8</color>
+</resources>

@@ -1,0 +1,29 @@
+# PyInstaller ve derleme çıktıları
+build/
+dist/
+*.spec
+
+# Python önbellek ve sanal ortam dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.env
+
+# Geçici ve yedekleme dosyaları
+app_backup_*.py
+temp_*.csv
+*.bak
+*.tmp
+
+# Çalışma zamanında oluşan, kullanıcıya özel dosyalar (depoya girmez)
+kafe_satislar.xlsx
+kafe_*_satislar.xlsx
+kullanicilar.json
+ozel_etkinlikler.json
+urun_fiyatlari.json
+
+# Eğitilmiş modeller ilk çalıştırmada yeniden üretilir
+models/
