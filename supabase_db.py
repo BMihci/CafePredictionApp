@@ -4,6 +4,7 @@ Kingfool Inc. | Supabase Bulut Veritabanı Sürücüsü (v1.2 Cloud Edition)
 """
 import os
 import requests
+import guvenlik
 import datetime
 import pandas as pd
 import numpy as np
@@ -62,9 +63,10 @@ def kullanicilari_yukle():
         return {}
 
 def kullanici_ekle(kullanici_adi, sifre, rol="user"):
+    """Kullanıcıyı ekler; şifre özetlenmemişse özetleyerek saklar."""
     payload = {
         "kullanici_adi": kullanici_adi,
-        "sifre": sifre,
+        "sifre": sifre if guvenlik.ozetli_mi(sifre) else guvenlik.sifre_ozetle(sifre),
         "rol": rol,
         "kurulum_tamam": False
     }
@@ -76,7 +78,9 @@ def kullanici_sil(kullanici_adi):
     return r.status_code in (200, 204)
 
 def kullanici_sifre_guncelle(kullanici_adi, yeni_sifre):
-    payload = {"sifre": yeni_sifre}
+    """Şifreyi günceller; özetlenmemişse özetleyerek saklar."""
+    sifre = yeni_sifre if guvenlik.ozetli_mi(yeni_sifre) else guvenlik.sifre_ozetle(yeni_sifre)
+    payload = {"sifre": sifre}
     r = requests.patch(f"{SUPABASE_URL}/rest/v1/kullanicilar?kullanici_adi=eq.{kullanici_adi}", headers=HEADERS, json=payload, timeout=6)
     return r.status_code in (200, 204)
 

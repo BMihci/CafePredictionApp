@@ -160,7 +160,7 @@ Kullanım ayrıntıları: [KULLANIM_KILAVUZU_v1.4.md](KULLANIM_KILAVUZU_v1.4.md)
 
 Bu bir prototiptir; gerçek bir işletmede kullanmadan önce şunların yapılması gerekir:
 
-- [ ] Şifrelerin düz metin yerine özetlenerek (hash) saklanması
+- [x] Şifrelerin düz metin yerine özetlenerek (hash) saklanması: PBKDF2-SHA256, `guvenlik.py`. Eski düz metin şifreler ilk girişte kendiliğinden özetlenir.
 - [ ] API uç noktalarına kimlik doğrulama eklenmesi
 - [ ] Supabase erişim kurallarının (RLS) kullanıcı bazında daraltılması
 - [ ] Model başarısının ayrılmış test verisiyle ölçülmesi

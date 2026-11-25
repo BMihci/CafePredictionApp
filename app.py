@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import guvenlik
 import datetime
 import requests
 import numpy as np
@@ -131,15 +132,16 @@ TEMALAR = {
 # -------------------------------------------------------------
 # KULLANICI YÖNETİMİ VE VERİTABANI
 # -------------------------------------------------------------
+# Demo hesapların şifreleri (admin1234, kafe1234) dosyaya özetlenmiş olarak yazılır.
 VARSAYILAN_KULLANICILAR = {
     "admin": {
-        "password": "admin1234",
+        "password": guvenlik.sifre_ozetle("admin1234"),
         "role": "admin",
         "urunler": ["Cold Brew", "Iced Americano", "Iced Latte", "Brownie"],
         "kurulum_tamam": True
     },
     "ornekkafe": {
-        "password": "kafe1234",
+        "password": guvenlik.sifre_ozetle("kafe1234"),
         "role": "user",
         "urunler": [],
         "kurulum_tamam": False
@@ -499,9 +501,20 @@ class KingfoolApp:
         sifre = self.txt_sifre.get().strip()
         self.kullanicilar = kullanicilari_yukle()
 
-        if kullanici in self.kullanicilar and self.kullanicilar[kullanici]["password"] == sifre:
+        if kullanici in self.kullanicilar and guvenlik.sifre_dogrula(sifre, self.kullanicilar[kullanici].get("password")):
             self.aktif_kullanici = kullanici
             bilgi = self.kullanicilar[kullanici]
+
+            # Eski sürümden kalan düz metin şifreyi özetlenmiş haliyle yeniden kaydet
+            if guvenlik.yukseltme_gerekli(bilgi.get("password")):
+                yeni_ozet = guvenlik.sifre_ozetle(sifre)
+                try:
+                    import supabase_db
+                    supabase_db.kullanici_sifre_guncelle(kullanici, yeni_ozet)
+                except Exception as e:
+                    print(f"[Supabase Sifre Yukseltme] {e}")
+                bilgi["password"] = yeni_ozet
+                kullanicilari_kaydet(self.kullanicilar)
 
             if bilgi["role"] == "admin":
                 self.goster_admin_ekrani()
@@ -825,16 +838,18 @@ class KingfoolApp:
             messagebox.showerror("Admin", "Bu kullanıcı adı zaten mevcut!")
             return
 
+        sifre_ozeti = guvenlik.sifre_ozetle(sifre)
+
         # 1. Supabase Bulut Veritabanına Ekle
         try:
             import supabase_db
-            supabase_db.kullanici_ekle(ad, sifre, rol)
+            supabase_db.kullanici_ekle(ad, sifre_ozeti, rol)
         except Exception as e:
             print(f"[Supabase Kullanici Ekle] {e}")
 
         # 2. Yerel Bellek ve JSON Güncelle
         self.kullanicilar[ad] = {
-            "password": sifre,
+            "password": sifre_ozeti,
             "role": rol,
             "urunler": [],
             "kurulum_tamam": False
@@ -857,15 +872,17 @@ class KingfoolApp:
             messagebox.showwarning("Admin", "Lütfen yeni bir şifre yazınız!")
             return
 
+        sifre_ozeti = guvenlik.sifre_ozetle(yeni_sifre)
+
         # 1. Supabase Bulut Veritabanında Güncelle
         try:
             import supabase_db
-            supabase_db.kullanici_sifre_guncelle(kullanici_ad, yeni_sifre)
+            supabase_db.kullanici_sifre_guncelle(kullanici_ad, sifre_ozeti)
         except Exception as e:
             print(f"[Supabase Sifre Guncelle] {e}")
 
         # 2. Yerel Bellek ve JSON Güncelle
-        self.kullanicilar[kullanici_ad]["password"] = yeni_sifre
+        self.kullanicilar[kullanici_ad]["password"] = sifre_ozeti
         kullanicilari_kaydet(self.kullanicilar)
         self.txt_yeni_parola.delete(0, tk.END)
         messagebox.showinfo("Admin", f"'{kullanici_ad}' kullanıcısının şifresi güncellendi!")

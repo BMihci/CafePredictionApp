@@ -4,6 +4,8 @@
 
 -- UYARI: Bu şema bir demo kurulumu içindir.
 --  * Aşağıdaki başlangıç şifreleri örnektir; kendi projenizde mutlaka değiştirin.
+--    Uygulama bu düz metin şifreleri ilk başarılı girişte PBKDF2 özetine çevirir
+--    (bkz. guvenlik.py); yeni eklenen kullanıcıların şifreleri hep özetlenmiş saklanır.
 --  * RLS politikaları anonim role tam okuma/yazma izni verir. Gerçek kullanımda
 --    politikaları daraltın ve şifreleri düz metin olarak saklamayın.
 

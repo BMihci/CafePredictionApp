@@ -16,6 +16,7 @@ from pydantic import BaseModel
 # Proje ana dizinini import yoluna ekleyelim
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import supabase_db
+import guvenlik
 import inventory_manager
 import ml_ops
 import llm_coaching
@@ -124,8 +125,16 @@ def login(req: LoginRequest):
         raise HTTPException(status_code=401, detail="Kullanıcı bulunamadı!")
     
     user_data = users[req.username]
-    if user_data["password"] != req.password:
+    kayitli = user_data.get("password")
+    if not guvenlik.sifre_dogrula(req.password, kayitli):
         raise HTTPException(status_code=401, detail="Hatalı şifre!")
+
+    # Eski sürümden kalan düz metin şifreyi buluta özetlenmiş haliyle yaz
+    if guvenlik.yukseltme_gerekli(kayitli):
+        try:
+            supabase_db.kullanici_sifre_guncelle(req.username, guvenlik.sifre_ozetle(req.password))
+        except Exception:
+            pass
         
     return {
         "success": True,
