@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#121013">
+<title>Kingfool Inc. · Tarayıcı Demosu</title>
+<style>
+  :root {
+    --bg: #121013; --card: #1d1a1e; --chip: #29242a; --text: #faf7f9; --muted: #a79fa8;
+    --border: #363037; --gold: #fdb913; --red: #a6192e; --ok: #5fc195;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.45; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 16px 16px 48px; }
+  header h1 { margin: 6px 0 2px; font-size: 1.35rem; color: var(--gold); letter-spacing: .02em; }
+  header p { margin: 0 0 14px; color: var(--muted); font-size: .9rem; }
+  .note { background: color-mix(in srgb, var(--gold) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent); border-radius: 12px; padding: 10px 12px; font-size: .85rem; margin-bottom: 14px; }
+  .note a { color: var(--gold); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 12px; font-size: 1rem; }
+  .row-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .row-head h2 { margin: 0; }
+  .muted { color: var(--muted); font-size: .82rem; }
+
+  .inputs { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .temp { display: flex; align-items: center; gap: 12px; }
+  .temp input[type=range] { flex: 1; min-width: 0; accent-color: var(--gold); }
+  .temp b { min-width: 64px; text-align: right; font-size: 1.2rem; font-variant-numeric: tabular-nums; color: var(--gold); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+  .toggle { display: inline-flex; align-items: center; gap: 8px; background: var(--chip); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: .9rem; }
+  .toggle input { width: 18px; height: 18px; accent-color: var(--gold); margin: 0; }
+
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  @media (min-width: 560px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .tile { background: var(--chip); border-radius: 12px; padding: 12px; border: 1px solid transparent; cursor: pointer; text-align: left; color: inherit; font: inherit; }
+  .tile.sel { border-color: var(--gold); }
+  .tile span { display: block; font-size: .82rem; color: var(--muted); }
+  .tile b { display: block; font-size: 1.7rem; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .tile small { color: var(--muted); font-size: .74rem; }
+  .total { margin-top: 10px; font-size: .9rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  td { padding: 7px 2px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+
+  select { background: var(--chip); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font: inherit; }
+  .chart { display: flex; align-items: flex-end; gap: 2px; height: 140px; margin-top: 6px; }
+  .chart .b { flex: 1; min-width: 0; background: color-mix(in srgb, var(--gold) 35%, transparent); border-radius: 3px 3px 0 0; position: relative; }
+  .chart .b.we { background: color-mix(in srgb, var(--gold) 55%, transparent); }
+  .chart .b.f { background: var(--red); outline: 2px solid var(--gold); outline-offset: -2px; }
+  .axis { display: flex; justify-content: space-between; color: var(--muted); font-size: .72rem; margin-top: 4px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .76rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  .imp { display: grid; grid-template-columns: minmax(0, 150px) 1fr 44px; gap: 6px 10px; align-items: center; font-size: .85rem; }
+  .imp .bar { height: 10px; background: var(--chip); border-radius: 5px; overflow: hidden; }
+  .imp .bar i { display: block; height: 100%; background: var(--gold); }
+  .imp .v { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .metric { background: var(--chip); border-radius: 12px; padding: 10px 12px; }
+  .metric span { display: block; font-size: .76rem; color: var(--muted); }
+  .metric b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .good { color: var(--ok); }
+  footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 18px; }
+  footer a { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🃏 KINGFOOL INC.</h1>
+    <p>Kafe satış tahmini · tarayıcı demosu</p>
+  </header>
+
+  <div class="note">
+    Bu sayfa, uygulamanın tahmin motorunu <b>uydurma örnek veriyle</b> (90 gün, 4 ürün) tarayıcıda çalıştırır; hiçbir veri gönderilmez.
+    Asıl uygulama Python ile yazılmış masaüstü programı, REST API ve Android uygulamasıdır:
+    <a href="https://github.com/BMihci/CafePredictionApp">kaynak kodu GitHub'da</a>.
+  </div>
+
+  <div class="card">
+    <div class="row-head"><h2>Yarın için koşullar</h2><span class="muted" id="tomorrowLbl"></span></div>
+    <div class="inputs">
+      <div class="temp">
+        <label for="temp" class="muted">Hava</label>
+        <input type="range" id="temp" min="-5" max="40" step="0.5" value="18" aria-label="Yarınki sıcaklık">
+        <b id="tempLbl">18 °C</b>
+      </div>
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="we"> Hafta sonu</label>
+        <label class="toggle"><input type="checkbox" id="promo"> Promosyon</label>
+        <label class="toggle"><input type="checkbox" id="hol"> Resmi tatil</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row-head"><h2>Yarınki satış tahmini</h2><span class="muted">Ürüne dokun, ayrıntısı aşağıda</span></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="total" id="total"></div>
+  </div>
+
+  <div class="card">
+    <h2>Hazırlanacak hammadde</h2>
+    <table id="mats"></table>
+    <p class="muted" style="margin:10px 0 0">Tahmin edilen adetler ürün reçeteleriyle çarpılarak hesaplanır.</p>
+  </div>
+
+  <div class="card">
+    <div class="row-head">
+      <h2>Model ayrıntısı</h2>
+      <select id="prod" aria-label="Ürün"></select>
+    </div>
+    <div class="chart" id="chart" role="img" aria-label="Son 30 günün satışı ve yarınki tahmin"></div>
+    <div class="axis"><span id="axFrom"></span><span>Yarın</span></div>
+    <div class="legend"><span><i style="background:color-mix(in srgb,#fdb913 35%,transparent)"></i>Hafta içi</span><span><i style="background:color-mix(in srgb,#fdb913 55%,transparent)"></i>Hafta sonu</span><span><i style="background:#a6192e"></i>Yarın (tahmin)</span></div>
+
+    <h2 style="margin-top:18px">Tahmini en çok etkileyenler</h2>
+    <div class="imp" id="imp"></div>
+
+    <div class="metrics">
+      <div class="metric"><span>Modelin ortalama hatası (son 14 gün)</span><b id="mae"></b></div>
+      <div class="metric"><span>"Dün ne sattıysa" tahmininin hatası</span><b id="naive"></b></div>
+    </div>
+    <p class="muted" style="margin:10px 0 0" id="evalNote"></p>
+  </div>
+
+  <footer>
+    Ürün başına 100 ağaçlı, en fazla 5 derinlikli Random Forest; asıl uygulamadaki 9 öznitelikle sayfa açılırken eğitilir.<br>
+    © 2026 Barış Mıhçı · <a href="https://github.com/BMihci/CafePredictionApp">CafePredictionApp</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const URUNLER = ["Cold Brew", "Iced Americano", "Iced Latte", "Brownie"];
+const VERI = [["2026-08-01",31.0,1,0,85,79,93,36],["2026-08-02",31.5,1,0,85,85,93,42],["2026-08-03",30.1,0,0,65,71,78,29],["2026-08-04",28.6,0,0,61,62,83,33],["2026-08-05",29.4,0,0,69,78,77,30],["2026-08-06",28.0,0,1,73,84,85,33],["2026-08-07",30.2,0,0,67,69,65,29],["2026-08-08",32.8,1,1,100,102,112,45],["2026-08-09",28.6,1,1,96,92,90,51],["2026-08-10",28.2,0,0,66,54,63,27],["2026-08-11",30.5,0,0,70,73,80,30],["2026-08-12",30.0,0,0,64,71,79,23],["2026-08-13",29.3,0,0,59,70,72,33],["2026-08-14",26.9,0,0,65,59,59,27],["2026-08-15",28.7,1,0,83,79,86,33],["2026-08-16",30.1,1,0,81,82,87,40],["2026-08-17",25.5,0,0,59,68,70,37],["2026-08-18",27.3,0,0,65,67,83,25],["2026-08-19",23.9,0,0,57,59,65,29],["2026-08-20",25.1,0,0,60,69,61,29],["2026-08-21",23.7,0,0,50,56,56,29],["2026-08-22",27.1,1,1,94,85,99,49],["2026-08-23",24.7,1,0,62,63,80,39],["2026-08-24",27.9,0,1,78,85,78,34],["2026-08-25",27.5,0,0,64,71,71,34],["2026-08-26",26.6,0,0,63,69,61,29],["2026-08-27",21.3,0,1,68,67,79,42],["2026-08-28",25.5,0,0,64,63,73,28],["2026-08-29",26.4,1,0,67,77,90,37],["2026-08-30",26.6,1,1,77,85,95,40],["2026-08-31",22.8,0,0,54,56,65,41],["2026-09-01",25.0,0,0,50,61,65,31],["2026-09-02",23.7,0,0,52,66,61,34],["2026-09-03",23.9,0,0,57,62,61,33],["2026-09-04",27.9,0,0,54,67,63,32],["2026-09-05",23.6,1,1,67,77,84,49],["2026-09-06",25.2,1,0,71,70,87,50],["2026-09-07",27.0,0,1,72,83,82,33],["2026-09-08",23.6,0,0,51,61,64,27],["2026-09-09",24.5,0,0,54,60,71,29],["2026-09-10",24.8,0,0,50,59,55,27],["2026-09-11",24.6,0,0,47,55,60,36],["2026-09-12",21.6,1,0,60,66,76,47],["2026-09-13",24.3,1,0,63,76,82,39],["2026-09-14",26.9,0,0,52,63,67,26],["2026-09-15",20.4,0,0,47,51,63,33],["2026-09-16",25.5,0,0,56,61,68,38],["2026-09-17",23.7,0,0,54,59,56,22],["2026-09-18",21.9,0,0,43,47,54,36],["2026-09-19",27.6,1,0,72,77,91,37],["2026-09-20",24.7,1,0,63,68,84,47],["2026-09-21",20.2,0,0,39,56,45,31],["2026-09-22",22.8,0,0,51,53,70,32],["2026-09-23",23.8,0,0,48,61,67,27],["2026-09-24",21.9,0,0,50,62,68,30],["2026-09-25",23.7,0,1,66,67,75,45],["2026-09-26",21.9,1,0,72,64,74,47],["2026-09-27",23.3,1,0,58,71,72,42],["2026-09-28",24.9,0,0,59,61,80,29],["2026-09-29",20.1,0,0,43,46,56,27],["2026-09-30",21.8,0,0,47,57,69,33],["2026-10-01",20.2,0,0,36,61,53,35],["2026-10-02",21.4,0,0,44,53,60,34],["2026-10-03",18.3,1,0,57,59,59,45],["2026-10-04",19.5,1,0,56,57,69,41],["2026-10-05",20.2,0,0,44,53,63,35],["2026-10-06",22.4,0,0,48,50,53,34],["2026-10-07",22.8,0,0,56,51,68,39],["2026-10-08",17.2,0,1,48,62,67,50],["2026-10-09",18.2,0,0,28,43,47,35],["2026-10-10",21.2,1,0,57,71,72,41],["2026-10-11",15.3,1,0,36,61,61,47],["2026-10-12",18.5,0,1,35,59,67,39],["2026-10-13",19.1,0,0,38,52,52,32],["2026-10-14",21.9,0,0,54,65,55,34],["2026-10-15",20.5,0,0,45,51,55,31],["2026-10-16",18.1,0,0,33,44,47,38],["2026-10-17",17.9,1,0,47,52,61,46],["2026-10-18",18.0,1,0,58,59,69,47],["2026-10-19",21.7,0,0,48,62,65,33],["2026-10-20",17.3,0,0,37,50,42,33],["2026-10-21",17.4,0,0,37,41,52,33],["2026-10-22",18.7,0,1,52,54,64,41],["2026-10-23",17.5,0,1,53,53,60,40],["2026-10-24",17.1,1,0,53,59,72,47],["2026-10-25",14.9,1,0,46,52,60,48],["2026-10-26",17.2,0,0,31,46,60,31],["2026-10-27",16.1,0,0,36,45,45,37],["2026-10-28",19.5,0,1,51,59,72,36],["2026-10-29",18.2,0,0,44,47,52,33]];
+  // Türkiye'de örnek veri aralığına düşen resmi tatiller
+  const TATILLER = new Set(['2026-08-30', '2026-10-29']);
+  const OZNITELIKLER = ['Sicaklik', 'Haftasonu_Mu', 'Promosyon_Var_Mi', 'Ay', 'Haftanin_Gunu', 'Satis_Lag1', 'Satis_Lag7', 'Sicaklik_x_Promosyon', 'Tatil_Mi'];
+  const ETIKET = { Sicaklik: 'Sıcaklık', Haftasonu_Mu: 'Hafta sonu', Promosyon_Var_Mi: 'Promosyon', Ay: 'Ay', Haftanin_Gunu: 'Haftanın günü',
+    Satis_Lag1: 'Dünkü satış', Satis_Lag7: 'Geçen haftanın aynı günü', Sicaklik_x_Promosyon: 'Sıcaklık × promosyon', Tatil_Mi: 'Resmi tatil' };
+  const RECETE = {
+    'Cold Brew': [['Kahve çekirdeği', 50, 'g'], ['Su', 150, 'ml'], ['Karton bardak', 1, 'adet'], ['Pipet', 1, 'adet']],
+    'Iced Latte': [['Kahve çekirdeği', 20, 'g'], ['Süt', 180, 'ml'], ['Buz', 50, 'g'], ['Karton bardak', 1, 'adet'], ['Pipet', 1, 'adet']],
+    'Iced Americano': [['Kahve çekirdeği', 20, 'g'], ['Su', 150, 'ml'], ['Buz', 40, 'g'], ['Karton bardak', 1, 'adet'], ['Pipet', 1, 'adet']],
+    'Brownie': [['Porsiyon brownie', 1, 'adet'], ['Peçete / ambalaj', 1, 'adet']],
+  };
+  const $ = id => document.getElementById(id);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+  const pad = n => String(n).padStart(2, '0');
+  const dkey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const dow = d => (d.getDay() + 6) % 7; // pandas: Pazartesi = 0
+  const fmtN = (n, f = 1) => n.toLocaleString('tr-TR', { maximumFractionDigits: f });
+
+  // ---------- Random Forest (regresyon) ----------
+  function mulberry(seed) { return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function buildTree(X, y, idx, depth, opt, imp) {
+    const n = idx.length;
+    let sum = 0, sq = 0;
+    for (const i of idx) { sum += y[i]; sq += y[i] * y[i]; }
+    const mean = sum / n, sse = sq - sum * sum / n;
+    if (depth >= opt.maxDepth || n < 2 * opt.minLeaf || sse < 1e-9) return { v: mean };
+    let best = null;
+    for (let f = 0; f < X[0].length; f++) {
+      const ord = idx.slice().sort((a, b) => X[a][f] - X[b][f]);
+      let ls = 0, lq = 0;
+      for (let k = 0; k < n - 1; k++) {
+        const yi = y[ord[k]]; ls += yi; lq += yi * yi;
+        if (X[ord[k]][f] === X[ord[k + 1]][f]) continue;
+        const ln = k + 1, rn = n - ln;
+        if (ln < opt.minLeaf || rn < opt.minLeaf) continue;
+        const rs = sum - ls, rq = sq - lq;
+        const s = (lq - ls * ls / ln) + (rq - rs * rs / rn);
+        if (!best || s < best.s) best = { s, f, t: (X[ord[k]][f] + X[ord[k + 1]][f]) / 2 };
+      }
+    }
+    if (!best) return { v: mean };
+    imp[best.f] += sse - best.s;
+    const L = [], R = [];
+    for (const i of idx) (X[i][best.f] <= best.t ? L : R).push(i);
+    return { f: best.f, t: best.t, l: buildTree(X, y, L, depth + 1, opt, imp), r: buildTree(X, y, R, depth + 1, opt, imp) };
+  }
+  const predTree = (n, x) => { while (n.v === undefined) n = x[n.f] <= n.t ? n.l : n.r; return n.v; };
+  function fitForest(X, y, opt) {
+    const rnd = mulberry(opt.seed), imp = new Array(X[0].length).fill(0), trees = [];
+    for (let t = 0; t < opt.trees; t++) {
+      const idx = Array.from({ length: X.length }, () => Math.floor(rnd() * X.length));
+      trees.push(buildTree(X, y, idx, 0, opt, imp));
+    }
+    const tot = imp.reduce((a, b) => a + b, 0) || 1;
+    return { predict: x => trees.reduce((a, tr) => a + predTree(tr, x), 0) / trees.length, imp: imp.map(v => v / tot) };
+  }
+  const OPT = { trees: 100, maxDepth: 5, minLeaf: 1, seed: 42 };
+
+  // ---------- Öznitelikler (ml_ops.py ile aynı) ----------
+  const rows = VERI.map(r => ({ d: r[0], date: parseKey(r[0]), temp: r[1], we: r[2], promo: r[3], s: r.slice(4) }));
+  const feat = (temp, we, promo, date, lag1, lag7, hol) => [temp, we, promo, date.getMonth() + 1, dow(date), lag1, lag7, temp * promo, hol];
+  function dataset(p, from, to) {
+    const X = [], y = [];
+    for (let i = Math.max(7, from); i < to; i++) {
+      const r = rows[i];
+      X.push(feat(r.temp, r.we, r.promo, r.date, rows[i - 1].s[p], rows[i - 7].s[p], TATILLER.has(r.d) ? 1 : 0));
+      y.push(r.s[p]);
+    }
+    return { X, y };
+  }
+
+  const models = URUNLER.map((name, p) => {
+    const all = dataset(p, 0, rows.length);
+    const model = fitForest(all.X, all.y, OPT);
+    // Dürüst ölçüm: son 14 günü eğitimden ayır, onları tahmin et
+    const cut = rows.length - 14, tr = dataset(p, 0, cut), te = dataset(p, cut, rows.length);
+    const m2 = fitForest(tr.X, tr.y, OPT);
+    let e = 0, en = 0;
+    te.X.forEach((x, i) => { e += Math.abs(m2.predict(x) - te.y[i]); en += Math.abs(x[5] - te.y[i]); });
+    return { name, p, model, mae: e / te.y.length, naive: en / te.y.length };
+  });
+
+  // ---------- Arayüz ----------
+  const last = rows[rows.length - 1].date;
+  const tomorrow = new Date(last); tomorrow.setDate(last.getDate() + 1);
+  const tKey = dkey(tomorrow);
+  $('tomorrowLbl').textContent = tomorrow.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' (verinin ertesi günü)';
+  $('we').checked = dow(tomorrow) >= 5;
+  $('hol').checked = TATILLER.has(tKey);
+  URUNLER.forEach((n, i) => { const o = el('option', null, n); o.value = i; $('prod').appendChild(o); });
+  let sel = 0;
+
+  function forecast(m) {
+    const n = rows.length, temp = +$('temp').value, we = $('we').checked ? 1 : 0, promo = $('promo').checked ? 1 : 0, hol = $('hol').checked ? 1 : 0;
+    const x = feat(temp, we, promo, tomorrow, rows[n - 1].s[m.p], rows[n - 7].s[m.p], hol);
+    return Math.max(0, Math.round(m.model.predict(x)));
+  }
+
+  function render() {
+    $('tempLbl').textContent = fmtN(+$('temp').value) + ' °C';
+    const preds = models.map(forecast);
+    const tiles = $('tiles'); tiles.textContent = '';
+    models.forEach((m, i) => {
+      const t = el('button', 'tile' + (i === sel ? ' sel' : '')); t.type = 'button';
+      const n = rows.length;
+      t.append(el('span', null, m.name), el('b', null, preds[i]), el('small', null, 'dün ' + rows[n - 1].s[i] + ' · geçen hafta ' + rows[n - 7].s[i]));
+      t.addEventListener('click', () => { sel = i; $('prod').value = i; render(); });
+      tiles.appendChild(t);
+    });
+    $('total').innerHTML = '';
+    $('total').append('Toplam: ', el('b', null, preds.reduce((a, b) => a + b, 0) + ' adet'));
+
+    const agg = {};
+    models.forEach((m, i) => (RECETE[m.name] || []).forEach(([h, q, u]) => { const a = agg[h] || (agg[h] = { q: 0, u }); a.q += q * preds[i]; }));
+    const mats = $('mats'); mats.textContent = '';
+    Object.entries(agg).forEach(([h, a]) => {
+      let v = a.q, u = a.u;
+      if (u === 'g' && v >= 1000) { v /= 1000; u = 'kg'; } else if (u === 'ml' && v >= 1000) { v /= 1000; u = 'litre'; }
+      const tr = el('tr'); tr.append(el('td', null, h), el('td', 'n', fmtN(v, u === 'adet' ? 0 : 2) + ' ' + u)); mats.appendChild(tr);
+    });
+
+    const m = models[sel], n = rows.length, hist = rows.slice(n - 30);
+    const vals = hist.map(r => r.s[sel]).concat(preds[sel]), max = Math.max(...vals, 1);
+    const ch = $('chart'); ch.textContent = '';
+    vals.forEach((v, i) => {
+      const isF = i === vals.length - 1, r = hist[i];
+      const b = el('div', 'b' + (isF ? ' f' : r.we ? ' we' : ''));
+      b.style.height = Math.max(2, Math.round(v / max * 130)) + 'px';
+      b.title = (isF ? 'Yarın (tahmin)' : r.date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' })) + ': ' + v;
+      ch.appendChild(b);
+    });
+    $('axFrom').textContent = hist[0].date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+
+    const imp = m.model.imp.map((v, i) => [OZNITELIKLER[i], v]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const box = $('imp'); box.textContent = '';
+    imp.forEach(([k, v]) => {
+      const bar = el('div', 'bar'), fill = el('i'); fill.style.width = Math.round(v / imp[0][1] * 100) + '%'; bar.appendChild(fill);
+      box.append(el('span', null, ETIKET[k]), bar, el('span', 'v', '%' + Math.round(v * 100)));
+    });
+    $('mae').textContent = '±' + fmtN(m.mae) + ' adet';
+    $('naive').textContent = '±' + fmtN(m.naive) + ' adet';
+    $('mae').className = m.mae < m.naive ? 'good' : '';
+    $('evalNote').textContent = 'Son 14 gün eğitimden ayrıldı ve model bu günleri hiç görmeden tahmin etti. ' +
+      (m.mae < m.naive ? 'Model, "dün ne sattıysa yarın da o kadar satar" varsayımından ' + fmtN((1 - m.mae / m.naive) * 100, 0) + '% daha az hata yapıyor.' : 'Bu üründe model basit varsayımı geçemiyor; daha fazla veri gerekir.');
+  }
+
+  ['temp', 'we', 'promo', 'hol'].forEach(id => $(id).addEventListener('input', render));
+  $('prod').addEventListener('change', e => { sel = +e.target.value; render(); });
+  render();
+})();
+</script>
+</body>
+</html>

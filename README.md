@@ -4,6 +4,8 @@ Kafelerin günlük ürün satışlarını makine öğrenmesiyle tahmin eden; bu 
 
 **Sürüm:** v1.5 · **Durum:** çalışan prototip, geliştirme sürüyor
 
+▶️ **[Tarayıcıda dene](https://bmihci.github.io/CafePredictionApp/demo/)**: tahmin motoru örnek veriyle tarayıcıda çalışır; hava, hafta sonu ve promosyonu değiştirip yarının satış tahminini ve gereken hammaddeyi gör. Kurulum gerekmez.
+
 > Küçük bir kafe "yarın kaç Cold Brew satarım, ne kadar süt ve kahve hazırlamalıyım?" sorusuna sezgiyle yanıt verir. Bu proje aynı soruyu geçmiş satış, hava durumu, haftanın günü, promosyon ve tatil bilgisiyle yanıtlamayı dener.
 
 <p align="center">
